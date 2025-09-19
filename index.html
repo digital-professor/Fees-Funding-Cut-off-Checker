@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSBU & SFE Fee Liability Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .result-card {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .result-card.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Simple animation for input focus */
+        input[type="date"]:focus, input[type="radio"]:focus + label {
+            box-shadow: 0 0 0 2px #3b82f6;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-8">
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white">Fee Liability Checker</h1>
+            <p class="text-gray-400 mt-2">Determine your LSBU fee and SFE funding status based on your dates.</p>
+        </div>
+        
+        <!-- Form Inputs -->
+        <div class="space-y-6">
+            <div>
+                <label for="courseStartDate" class="block text-sm font-medium text-gray-300 mb-2">Official Course Start Date</label>
+                <input type="date" id="courseStartDate" name="courseStartDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+
+            <div>
+                 <p class="block text-sm font-medium text-gray-300 mb-2">Did you enrol after your course start date?</p>
+                 <div class="flex items-center space-x-4">
+                     <div class="flex items-center">
+                        <input id="enrolledAfterYes" name="enrolledAfter" type="radio" value="yes" class="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500">
+                        <label for="enrolledAfterYes" class="ml-2 block text-sm text-gray-300">Yes</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="enrolledAfterNo" name="enrolledAfter" type="radio" value="no" class="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500">
+                        <label for="enrolledAfterNo" class="ml-2 block text-sm text-gray-300">No</label>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="enrolmentDateWrapper" class="hidden">
+                <label for="enrolmentDate" class="block text-sm font-medium text-gray-300 mb-2">Enrolment Date</label>
+                <input type="date" id="enrolmentDate" name="enrolmentDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+
+            <button id="checkButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+                Check My Status
+            </button>
+        </div>
+
+        <!-- Result Area -->
+        <div id="result" class="pt-6">
+            <!-- Green Result -->
+            <div id="result-clear" class="result-card bg-green-900/50 border border-green-700 rounded-lg p-5">
+                <h3 class="text-xl font-semibold text-green-300 flex items-center"><i class="fas fa-check-circle mr-3"></i>Outcome: No Financial Liability</h3>
+                <div class="mt-3 text-green-300 space-y-2">
+                    <p><span class="font-bold text-green-200">LSBU Fees:</span> No fees are due.</p>
+                    <p><span class="font-bold text-green-200">SFE Funding:</span> Your year of funding has NOT been used.</p>
+                    <p class="text-sm text-green-400 mt-2">Reason: You are withdrawing before your official course start date.</p>
+                </div>
+            </div>
+            <!-- Yellow Result -->
+            <div id="result-sfe-used" class="result-card bg-yellow-900/50 border border-yellow-700 rounded-lg p-5">
+                <h3 class="text-xl font-semibold text-yellow-300 flex items-center"><i class="fas fa-exclamation-triangle mr-3"></i>Outcome: Partial Liability</h3>
+                <div class="mt-3 text-yellow-300 space-y-2">
+                    <p><span class="font-bold text-yellow-200">LSBU Fees:</span> No fees are due.</p>
+                    <p><span class="font-bold text-yellow-200">SFE Funding:</span> <span class="underline">Your year of funding HAS been used.</span></p>
+                    <p class="text-sm text-yellow-400 mt-2">Reason: You are within the 14-day "cooling-off" period from your start/enrolment date.</p>
+                </div>
+            </div>
+            <!-- Red Result -->
+            <div id="result-full-liability" class="result-card bg-red-900/50 border border-red-700 rounded-lg p-5">
+                <h3 class="text-xl font-semibold text-red-300 flex items-center"><i class="fas fa-times-circle mr-3"></i>Outcome: Full Financial Liability</h3>
+                <div class="mt-3 text-red-300 space-y-2">
+                    <p><span class="font-bold text-red-200">LSBU Fees:</span> <span class="underline">Fees are applicable (25% or more).</span></p>
+                    <p><span class="font-bold text-red-200">SFE Funding:</span> <span class="underline">Your year of funding HAS been used.</span></p>
+                    <p class="text-sm text-red-400 mt-2">Reason: You are past the 14-day "cooling-off" period.</p>
+                </div>
+            </div>
+             <!-- Error Message -->
+            <div id="error-message" class="result-card bg-gray-700 text-yellow-400 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <script>
+        const courseStartDateInput = document.getElementById('courseStartDate');
+        const enrolmentDateInput = document.getElementById('enrolmentDate');
+        const enrolmentDateWrapper = document.getElementById('enrolmentDateWrapper');
+        const checkButton = document.getElementById('checkButton');
+        const enrolledAfterRadios = document.querySelectorAll('input[name="enrolledAfter"]');
+        
+        const resultClear = document.getElementById('result-clear');
+        const resultSfeUsed = document.getElementById('result-sfe-used');
+        const resultFullLiability = document.getElementById('result-full-liability');
+        const errorMessage = document.getElementById('error-message');
+
+        // Show/hide enrolment date input based on radio selection
+        enrolledAfterRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                if (event.target.value === 'yes') {
+                    enrolmentDateWrapper.classList.remove('hidden');
+                } else {
+                    enrolmentDateWrapper.classList.add('hidden');
+                }
+            });
+        });
+
+        const hideAllResults = () => {
+            resultClear.classList.remove('show');
+            resultSfeUsed.classList.remove('show');
+            resultFullLiability.classList.remove('show');
+            errorMessage.classList.remove('show');
+        };
+
+        const showError = (message) => {
+            hideAllResults();
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        };
+
+        checkButton.addEventListener('click', () => {
+            hideAllResults();
+
+            const courseStartValue = courseStartDateInput.value;
+            if (!courseStartValue) {
+                showError("Please select a course start date.");
+                return;
+            }
+            
+            // Get today's date at midnight for accurate comparison
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Get course start date at midnight
+            const courseStartDate = new Date(courseStartValue);
+            courseStartDate.setUTCHours(0, 0, 0, 0);
+            
+            const enrolledAfter = document.querySelector('input[name="enrolledAfter"]:checked');
+
+            // --- Workflow Logic ---
+
+            // 1. Is today BEFORE the course start date?
+            if (today < courseStartDate) {
+                resultClear.classList.add('show');
+                return;
+            }
+            
+            // If we are here, today is on or after the course start date.
+            // SFE year will be used in all subsequent cases.
+
+            // 2. Check if the user selected an enrolment option
+            if (!enrolledAfter) {
+                showError("Please select whether you enrolled after the course start date.");
+                return;
+            }
+
+            let keyDate;
+
+            if (enrolledAfter.value === 'no') {
+                // Key date is course start date if enrolled before/on start
+                keyDate = courseStartDate;
+            } else {
+                // Key date is enrolment date if enrolled after start
+                const enrolmentDateValue = enrolmentDateInput.value;
+                if (!enrolmentDateValue) {
+                    showError("Please select your enrolment date.");
+                    return;
+                }
+                const enrolmentDate = new Date(enrolmentDateValue);
+                enrolmentDate.setUTCHours(0, 0, 0, 0);
+
+                if (enrolmentDate < courseStartDate) {
+                    showError("Enrolment date cannot be before the course start date if you enrolled after it started.");
+                    return;
+                }
+                keyDate = enrolmentDate;
+            }
+
+            // Calculate the 14-day deadline
+            const deadline = new Date(keyDate);
+            deadline.setDate(deadline.getDate() + 14);
+
+            // 3. Are we within the 14-day period?
+            if (today <= deadline) {
+                 resultSfeUsed.classList.add('show');
+            } else {
+                // 4. We are outside the 14-day period
+                resultFullLiability.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
