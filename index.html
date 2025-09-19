@@ -12,8 +12,8 @@
     font-family: 'Inter', sans-serif;
   }
 </style>
+<!-- This initial script is kept in the head to prevent a "flash" of the wrong theme on page load -->
 <script>
-  // Apply theme from localStorage on initial load to prevent Flash of Unstyled Content (FOUC)
   if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.classList.add('dark');
   } else {
@@ -62,36 +62,39 @@
 
 <script>
 // --- THEME TOGGLE SCRIPT ---
-// This part must run after the DOM is ready to ensure the 'theme-toggle' element exists.
-document.addEventListener('DOMContentLoaded', function() {
-    const themeToggle = document.getElementById('theme-toggle');
+// This script runs after the entire page has been loaded, so all elements are available.
+const themeToggle = document.getElementById('theme-toggle');
 
-    function applyTheme(theme) {
-        if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+function applyTheme(theme) {
+    if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
     }
+}
 
-    // Set select value on load
-    const savedTheme = localStorage.getItem('theme') || 'system';
+// 1. Set the dropdown to the saved or default theme
+const savedTheme = localStorage.getItem('theme') || 'system';
+if (themeToggle) {
     themeToggle.value = savedTheme;
+}
 
-    // Listen for theme changes from the dropdown
+// 2. Add listener for dropdown changes
+if (themeToggle) {
     themeToggle.addEventListener('change', (e) => {
         const selectedTheme = e.target.value;
         localStorage.setItem('theme', selectedTheme);
         applyTheme(selectedTheme);
     });
+}
 
-    // Listen for system preference changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (localStorage.getItem('theme') === 'system') {
-            applyTheme('system');
-        }
-    });
+// 3. Add listener for OS-level theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('theme') === 'system') {
+        applyTheme('system');
+    }
 });
+
 
 // --- DEADLINE CHECKER SCRIPT (Functions need to be in the global scope for onclick) ---
 function toggleDetails() {
@@ -259,3 +262,4 @@ function checkDates() {
 
 </body>
 </html>
+
