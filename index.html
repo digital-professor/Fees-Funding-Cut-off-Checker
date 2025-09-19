@@ -12,27 +12,43 @@
     font-family: 'Inter', sans-serif;
   }
 </style>
+<script>
+  // Apply theme from localStorage on initial load to prevent Flash of Unstyled Content (FOUC)
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
 </head>
-<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4 transition-colors duration-300">
 
-<div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6">
+<div class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6 transition-colors duration-300">
+    <div class="absolute top-4 right-4">
+        <select id="theme-toggle" class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 transition">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select>
+    </div>
+
     <div class="text-center">
-        <h1 class="text-3xl font-bold text-white">Fee & Funding Deadline Checker</h1>
-        <p class="text-gray-400 mt-2">Enter course and enrolment dates to see key deadlines.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Fee & Funding Deadline Checker</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Enter course and enrolment dates to see key deadlines.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="md:col-span-1">
-        <label for="courseStart" class="block text-sm font-medium text-gray-300 mb-2">Official course start date</label>
-        <input type="date" id="courseStart" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition"/>
+        <label for="courseStart" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Official course start date</label>
+        <input type="date" id="courseStart" class="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition"/>
       </div>
       <div class="md:col-span-1">
-        <label for="enrolDate" class="block text-sm font-medium text-gray-300 mb-2">Enrolment date</label>
-        <input type="date" id="enrolDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition"/>
+        <label for="enrolDate" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Enrolment date</label>
+        <input type="date" id="enrolDate" class="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition"/>
       </div>
       <div class="md:col-span-1">
-        <label for="isHsc" class="block text-sm font-medium text-gray-300 mb-2">Is this an HSC course?</label>
-        <select id="isHsc" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition">
+        <label for="isHsc" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Is this an HSC course?</label>
+        <select id="isHsc" class="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition">
           <option value="no" selected>No (most courses)</option>
           <option value="yes">Yes (HSC)</option>
         </select>
@@ -45,6 +61,39 @@
 </div>
 
 <script>
+// --- THEME TOGGLE SCRIPT ---
+// This part must run after the DOM is ready to ensure the 'theme-toggle' element exists.
+document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function applyTheme(theme) {
+        if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+
+    // Set select value on load
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    themeToggle.value = savedTheme;
+
+    // Listen for theme changes from the dropdown
+    themeToggle.addEventListener('change', (e) => {
+        const selectedTheme = e.target.value;
+        localStorage.setItem('theme', selectedTheme);
+        applyTheme(selectedTheme);
+    });
+
+    // Listen for system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (localStorage.getItem('theme') === 'system') {
+            applyTheme('system');
+        }
+    });
+});
+
+// --- DEADLINE CHECKER SCRIPT (Functions need to be in the global scope for onclick) ---
 function toggleDetails() {
   const details = document.getElementById('deadlineDetails');
   const arrow = document.getElementById('details-arrow');
@@ -86,7 +135,7 @@ function checkDates() {
   const out = document.getElementById('output');
 
   if (!courseStartRaw || !enrolDateRaw) {
-    out.innerHTML = `<div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-3"><i class='fas fa-exclamation-circle'></i><span>Please enter both dates.</span></div>`;
+    out.innerHTML = `<div class="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 rounded-lg p-4 flex items-center gap-3"><i class='fas fa-exclamation-circle'></i><span>Please enter both dates.</span></div>`;
     return;
   }
 
@@ -94,10 +143,7 @@ function checkDates() {
   const enrolDate   = d(enrolDateRaw);
   const today       = d(new Date());
 
-  // SFE rule (external)
   const sfeDeadline = addDays(courseStart, -1);
-
-  // LSBU rule (internal)
   const fourteenDayAnchor = (enrolDate <= courseStart) ? courseStart : enrolDate;
   const fourteenDayDeadline = addDays(fourteenDayAnchor, 14);
   const cohortCap = isHsc ? d("2025-10-06") : d("2025-10-20");
@@ -115,31 +161,31 @@ function checkDates() {
   const sfeStatusIcon = sfeStillInTime ? '✅' : '❌';
   const lsbuStatusIcon = lsbuStillInTime ? '✅' : '❌';
   
-  const sfeDateColorClass = sfeStillInTime ? 'text-green-400' : 'text-red-400';
-  const lsbuDateColorClass = lsbuStillInTime ? 'text-green-400' : 'text-red-400';
+  const sfeDateColorClass = sfeStillInTime ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+  const lsbuDateColorClass = lsbuStillInTime ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
   
   const deadlinesDetailsHtml = `
     <div class="space-y-4">
         <div>
-            <p class="font-semibold text-gray-300">
+            <p class="font-semibold text-gray-700 dark:text-gray-300">
               <span class="inline-block w-6">${sfeStatusIcon}</span>SFE Year of Funding Deadline:
               <span class="font-bold ${sfeDateColorClass}">${formatDate(sfeDeadline)}</span>
-              <span class="ml-2 text-sm text-gray-500">${sfeDaysText}</span>
-              <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">SFE rule (external)</span>
+              <span class="ml-2 text-sm text-gray-500 dark:text-gray-500">${sfeDaysText}</span>
+              <span class="ml-2 py-1 px-2 bg-gray-200 dark:bg-gray-700 text-xs rounded-md">SFE rule (external)</span>
             </p>
-            <p class="text-sm text-gray-400 mt-1 pl-10">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 pl-10">
               Withdraw or interrupt before the official course start date to avoid using a year of SFE funding.
             </p>
         </div>
-        <div class="border-t border-gray-700"></div>
+        <div class="border-t border-gray-200 dark:border-gray-700"></div>
         <div>
-            <p class="font-semibold text-gray-300">
+            <p class="font-semibold text-gray-700 dark:text-gray-300">
               <span class="inline-block w-6">${lsbuStatusIcon}</span>LSBU Fee Liability Deadline:
               <span class="font-bold ${lsbuDateColorClass}">${formatDate(lsbuFeeLiabilityDeadline)}</span>
-              <span class="ml-2 text-sm text-gray-500">${lsbuDaysText}</span>
-              <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">LSBU rule (internal)</span>
+              <span class="ml-2 text-sm text-gray-500 dark:text-gray-500">${lsbuDaysText}</span>
+              <span class="ml-2 py-1 px-2 bg-gray-200 dark:bg-gray-700 text-xs rounded-md">LSBU rule (internal)</span>
             </p>
-            <p class="text-sm text-gray-400 mt-1 pl-10">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 pl-10">
               Per LSBU Tuition Fee Regulations 2025/26, section 23.5 — last date to withdraw or interrupt without tuition fee liability.
             </p>
         </div>
@@ -148,11 +194,11 @@ function checkDates() {
 
   const collapsibleSectionHtml = `
     <div>
-        <button onclick="toggleDetails()" class="w-full flex justify-between items-center text-left text-gray-300 font-semibold p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition">
+        <button onclick="toggleDetails()" class="w-full flex justify-between items-center text-left text-gray-700 dark:text-gray-300 font-semibold p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
             <span>View Deadline Breakdown</span>
             <i id="details-arrow" class="fas fa-chevron-down transition-transform"></i>
         </button>
-        <div id="deadlineDetails" class="hidden p-4 mt-2 bg-gray-900/50 rounded-lg">
+        <div id="deadlineDetails" class="hidden p-4 mt-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
             ${deadlinesDetailsHtml}
         </div>
     </div>
@@ -161,20 +207,20 @@ function checkDates() {
   let sfeStatusHtml = '';
   if (sfeStillInTime) {
     sfeStatusHtml = `
-      <div class="bg-green-900/50 border border-green-700 text-green-300 rounded-lg p-4 flex items-center gap-4">
+      <div class="bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300 rounded-lg p-4 flex items-center gap-4">
         <i class="fas fa-check-circle fa-2x"></i>
         <div>
           <p class="font-semibold">SFE Funding Deadline: Within deadline</p>
-          <p class="text-sm font-normal text-green-400/80">Withdraw or interrupt before <span class="font-bold">${formatDate(courseStart)}</span> to avoid using a year of SFE funding.</p>
+          <p class="text-sm font-normal text-green-700 dark:text-green-400/80">Withdraw or interrupt before <span class="font-bold">${formatDate(courseStart)}</span> to avoid using a year of SFE funding.</p>
         </div>
       </div>`;
   } else {
     sfeStatusHtml = `
-      <div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-4">
+      <div class="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 rounded-lg p-4 flex items-center gap-4">
         <i class="fas fa-times-circle fa-2x"></i>
         <div>
           <p class="font-semibold">SFE Funding Deadline: Deadline passed</p>
-          <p class="text-sm font-normal text-red-400/80">You have passed the deadline; a year of SFE funding will be used.</p>
+          <p class="text-sm font-normal text-red-700 dark:text-red-400/80">You have passed the deadline; a year of SFE funding will be used.</p>
         </div>
       </div>`;
   }
@@ -182,20 +228,20 @@ function checkDates() {
   let lsbuStatusHtml = '';
   if (lsbuStillInTime) {
     lsbuStatusHtml = `
-      <div class="bg-green-900/50 border border-green-700 text-green-300 rounded-lg p-4 flex items-center gap-4">
+      <div class="bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300 rounded-lg p-4 flex items-center gap-4">
         <i class="fas fa-check-circle fa-2x"></i>
         <div>
           <p class="font-semibold">LSBU Fee Liability Deadline: Within deadline</p>
-          <p class="text-sm font-normal text-green-400/80">Withdraw or interrupt by <span class="font-bold">${formatDate(lsbuFeeLiabilityDeadline)}</span> to avoid tuition fee charges.</p>
+          <p class="text-sm font-normal text-green-700 dark:text-green-400/80">Withdraw or interrupt by <span class="font-bold">${formatDate(lsbuFeeLiabilityDeadline)}</span> to avoid tuition fee charges.</p>
         </div>
       </div>`;
   } else {
     lsbuStatusHtml = `
-      <div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-4">
+      <div class="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 rounded-lg p-4 flex items-center gap-4">
         <i class="fas fa-times-circle fa-2x"></i>
         <div>
           <p class="font-semibold">LSBU Fee Liability Deadline: Deadline passed</p>
-          <p class="text-sm font-normal text-red-400/80">You have passed the deadline and may be liable for tuition fees.</p>
+          <p class="text-sm font-normal text-red-700 dark:text-red-400/80">You have passed the deadline and may be liable for tuition fees.</p>
         </div>
       </div>`;
   }
@@ -207,10 +253,9 @@ function checkDates() {
     </div>
   `;
 
-  out.innerHTML = collapsibleSectionHtml + '<div class="border-t border-gray-700 my-6"></div>' + trafficLightHtml;
+  out.innerHTML = collapsibleSectionHtml + '<div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>' + trafficLightHtml;
 }
 </script>
 
 </body>
 </html>
-
