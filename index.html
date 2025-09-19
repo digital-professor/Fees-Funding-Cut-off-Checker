@@ -18,7 +18,7 @@
 <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6">
     <div class="text-center">
         <h1 class="text-3xl font-bold text-white">Fee & Funding Deadline Checker</h1>
-        <p class="text-gray-400 mt-2">Enter your course and enrolment dates to see your key deadlines.</p>
+        <p class="text-gray-400 mt-2">Enter course and enrolment dates to see key deadlines.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -67,6 +67,17 @@ function formatDate(date) {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function formatDaysLeft(diff) {
+    if (diff > 0) {
+        return `(${diff} ${diff === 1 ? 'day' : 'days'} left)`;
+    } else if (diff < 0) {
+        const daysAgo = Math.abs(diff);
+        return `(${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago)`;
+    } else {
+        return `(Today is the deadline)`;
+    }
+}
+
 function checkDates() {
   const courseStartRaw = document.getElementById('courseStart').value;
   const enrolDateRaw   = document.getElementById('enrolDate').value;
@@ -95,6 +106,12 @@ function checkDates() {
   const sfeStillInTime  = today <= sfeDeadline;
   const lsbuStillInTime = today <= lsbuFeeLiabilityDeadline;
 
+  const sfeDaysDiff = Math.ceil((sfeDeadline - today) / (1000 * 60 * 60 * 24));
+  const lsbuDaysDiff = Math.ceil((lsbuFeeLiabilityDeadline - today) / (1000 * 60 * 60 * 24));
+
+  const sfeDaysText = formatDaysLeft(sfeDaysDiff);
+  const lsbuDaysText = formatDaysLeft(lsbuDaysDiff);
+
   const sfeStatusIcon = sfeStillInTime ? '✅' : '❌';
   const lsbuStatusIcon = lsbuStillInTime ? '✅' : '❌';
   
@@ -105,8 +122,9 @@ function checkDates() {
     <div class="space-y-4">
         <div>
             <p class="font-semibold text-gray-300">
-              <span class="inline-block w-6">${sfeStatusIcon}</span>Last date to avoid using a year of SFE funding:
+              <span class="inline-block w-6">${sfeStatusIcon}</span>SFE Year of Funding Deadline:
               <span class="font-bold ${sfeDateColorClass}">${formatDate(sfeDeadline)}</span>
+              <span class="ml-2 text-sm text-gray-500">${sfeDaysText}</span>
               <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">SFE rule (external)</span>
             </p>
             <p class="text-sm text-gray-400 mt-1 pl-10">
@@ -116,8 +134,9 @@ function checkDates() {
         <div class="border-t border-gray-700"></div>
         <div>
             <p class="font-semibold text-gray-300">
-              <span class="inline-block w-6">${lsbuStatusIcon}</span>LSBU fee liability deadline:
+              <span class="inline-block w-6">${lsbuStatusIcon}</span>LSBU Fee Liability Deadline:
               <span class="font-bold ${lsbuDateColorClass}">${formatDate(lsbuFeeLiabilityDeadline)}</span>
+              <span class="ml-2 text-sm text-gray-500">${lsbuDaysText}</span>
               <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">LSBU rule (internal)</span>
             </p>
             <p class="text-sm text-gray-400 mt-1 pl-10">
