@@ -1,244 +1,288 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Fee & Funding Deadline Checker</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-  body {
-    font-family: 'Inter', sans-serif;
-  }
-</style>
+    <meta charset="UTF-8">
+    <title>Fee & Funding Deadline Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background from screenshot */
+        }
+        .form-control {
+            background-color: #1F2937;
+            border: 1px solid #4B5563;
+            color: #F3F4F6;
+        }
+        .form-control:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+            outline: none;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-<div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6">
+<div class="w-full max-w-lg bg-[#182235] rounded-2xl shadow-2xl p-6 md:p-10 space-y-6">
     <div class="text-center">
         <h1 class="text-3xl font-bold text-white">Fee & Funding Deadline Checker</h1>
         <p class="text-gray-400 mt-2">Enter course and enrolment dates to see key deadlines.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="md:col-span-1">
-        <label for="courseStartSelect" class="block text-sm font-medium text-gray-300 mb-2">Official course start date</label>
-        <select id="courseStartSelect" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition">
-          <option value="" disabled selected>Choose course start date</option>
-          <option value="2025-09-22">22 Sep 2025</option>
-          <option value="2025-10-06">06 Oct 2025</option>
-          <option value="other">Other date...</option>
-        </select>
-        <input type="date" id="courseStartOther" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition mt-2 hidden"/>
-      </div>
-      <div class="md:col-span-1">
-        <label for="enrolDate" class="block text-sm font-medium text-gray-300 mb-2">Enrolment date</label>
-        <input type="date" id="enrolDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition"/>
-      </div>
-      <div class="md:col-span-1">
-        <label for="isHsc" class="block text-sm font-medium text-gray-300 mb-2">Is this an HSC course?</label>
-        <select id="isHsc" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 transition">
-          <option value="no" selected>No (most courses)</option>
-          <option value="yes">Yes (HSC)</option>
-        </select>
-      </div>
+    <div class="grid grid-cols-1 gap-6">
+        <div>
+            <label for="courseStartSelect" class="block text-sm font-medium text-gray-300 mb-2">Official course start date</label>
+            <select id="courseStartSelect" onchange="handleCourseStartChange(this)" class="w-full form-control rounded-lg p-3">
+                <option value="" disabled selected>Choose course start date</option>
+                <option value="2025-09-22">22 Sep 2025</option>
+                <option value="2025-10-06">06 Oct 2025</option>
+                <option value="other">Other date...</option>
+            </select>
+            <input type="date" id="courseStartOther" class="w-full form-control rounded-lg p-3 mt-2 hidden"/>
+        </div>
+        <div>
+            <label for="enrolDate" class="block text-sm font-medium text-gray-300 mb-2">Enrolment date</label>
+            <input type="date" id="enrolDate" class="w-full form-control rounded-lg p-3"/>
+        </div>
+        <div>
+            <label for="isHsc" class="block text-sm font-medium text-gray-300 mb-2">Is this an HSC course?</label>
+            <select id="isHsc" class="w-full form-control rounded-lg p-3">
+                <option value="no" selected>No (most courses)</option>
+                <option value="yes">Yes (HSC)</option>
+            </select>
+        </div>
     </div>
 
-    <button onclick="checkDates()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">Check Deadlines</button>
-
+    <button onclick="checkDates()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">Check Deadlines</button>
+    
     <div id="output" class="result pt-4" aria-live="polite"></div>
+
+    <div class="border-t border-gray-700 pt-4 mt-4">
+        <p class="text-xs text-gray-500 text-center">
+            <strong>Please Note:</strong> This tool provides guidance based on university regulations. It is your responsibility to confirm all official deadlines with LSBU and SFE. The SFE funding commitment is only triggered upon <strong>full enrolment</strong> and is strictly based on your official course start date; partial enrolment does not affect funding status.
+        </p>
+    </div>
 </div>
 
 <script>
-// --- Event listener for the new course start date dropdown ---
-const courseStartSelect = document.getElementById('courseStartSelect');
-const courseStartOther = document.getElementById('courseStartOther');
-
-if (courseStartSelect && courseStartOther) {
-    courseStartSelect.addEventListener('change', () => {
-        if (courseStartSelect.value === 'other') {
-            courseStartOther.classList.remove('hidden');
+    function handleCourseStartChange(selectElement) {
+        const otherDateInput = document.getElementById('courseStartOther');
+        if (selectElement.value === 'other') {
+            otherDateInput.classList.remove('hidden');
         } else {
-            courseStartOther.classList.add('hidden');
+            otherDateInput.classList.add('hidden');
         }
-    });
-}
-
-// --- DEADLINE CHECKER SCRIPT ---
-function toggleDetails() {
-  const details = document.getElementById('deadlineDetails');
-  const arrow = document.getElementById('details-arrow');
-  if (details && arrow) {
-    details.classList.toggle('hidden');
-    arrow.classList.toggle('rotate-180');
-  }
-}
-
-function d(val) {
-  const dt = new Date(val);
-  return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-}
-
-function addDays(date, days) {
-  const r = new Date(date);
-  r.setDate(r.getDate() + days);
-  return r;
-}
-
-function formatDate(date) {
-  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function formatDaysLeft(diff) {
-    if (diff > 0) {
-        return `(${diff} ${diff === 1 ? 'day' : 'days'} left)`;
-    } else if (diff < 0) {
-        const daysAgo = Math.abs(diff);
-        return `(${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago)`;
-    } else {
-        return `(Today is the deadline)`;
     }
-}
+    
+    function toggleHscNote() {
+        document.getElementById('hscNote').classList.toggle('hidden');
+        document.getElementById('hscArrow').classList.toggle('rotate-180');
+    }
 
-function checkDates() {
-  const courseStartSelect = document.getElementById('courseStartSelect');
-  let courseStartRaw = '';
-  if (courseStartSelect.value === 'other') {
-    courseStartRaw = document.getElementById('courseStartOther').value;
-  } else {
-    courseStartRaw = courseStartSelect.value;
-  }
+    function toggleDetails() {
+        const details = document.getElementById('deadlineDetails');
+        const arrow = document.getElementById('details-arrow');
+        if (details && arrow) {
+            details.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+    }
 
-  const enrolDateRaw   = document.getElementById('enrolDate').value;
-  const isHsc          = document.getElementById('isHsc').value === 'yes';
+    function d(val) {
+        const dt = new Date(val);
+        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    }
 
-  const out = document.getElementById('output');
+    function addDays(date, days) {
+        const r = new Date(date);
+        r.setDate(r.getDate() + days);
+        return r;
+    }
 
-  if (!courseStartRaw || !enrolDateRaw) {
-    out.innerHTML = `<div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-3"><i class='fas fa-exclamation-circle'></i><span>Please enter all dates.</span></div>`;
-    return;
-  }
+    function formatDate(date) {
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
 
-  const courseStart = d(courseStartRaw);
-  const enrolDate   = d(enrolDateRaw);
-  const today       = d(new Date());
+    function formatDaysLeft(diff) {
+        if (diff > 0) {
+            return `(${diff} ${diff === 1 ? 'day' : 'days'} left)`;
+        } else if (diff < 0) {
+            const daysAgo = Math.abs(diff);
+            return `(${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago)`;
+        } else {
+            return `(Today is the deadline)`;
+        }
+    }
 
-  const sfeDeadline = addDays(courseStart, -1);
-  const fourteenDayAnchor = (enrolDate <= courseStart) ? courseStart : enrolDate;
-  const fourteenDayDeadline = addDays(fourteenDayAnchor, 14);
-  const cohortCap = isHsc ? d("2025-10-06") : d("2025-10-20");
-  const lsbuFeeLiabilityDeadline = (fourteenDayDeadline > cohortCap) ? fourteenDayDeadline : cohortCap;
+    function checkDates() {
+        const courseStartSelect = document.getElementById('courseStartSelect').value;
+        const courseStartOther = document.getElementById('courseStartOther').value;
+        const courseStartRaw = courseStartSelect === 'other' ? courseStartOther : courseStartSelect;
+        
+        const enrolDateRaw = document.getElementById('enrolDate').value;
+        const isHsc = document.getElementById('isHsc').value === 'yes';
+        const out = document.getElementById('output');
 
-  const sfeStillInTime  = today <= sfeDeadline;
-  const lsbuStillInTime = today <= lsbuFeeLiabilityDeadline;
+        if (!courseStartRaw || !enrolDateRaw) {
+            out.innerHTML = `<div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4">Please enter all dates.</div>`;
+            return;
+        }
 
-  const sfeDaysDiff = Math.ceil((sfeDeadline - today) / (1000 * 60 * 60 * 24));
-  const lsbuDaysDiff = Math.ceil((lsbuFeeLiabilityDeadline - today) / (1000 * 60 * 60 * 24));
+        const courseStart = d(courseStartRaw);
+        const enrolDate = d(enrolDateRaw);
+        const today = d(new Date());
 
-  const sfeDaysText = formatDaysLeft(sfeDaysDiff);
-  const lsbuDaysText = formatDaysLeft(lsbuDaysDiff);
+        // Logic
+        const sfeDeadline = addDays(courseStart, -1);
+        const sfeStillInTime = today <= sfeDeadline;
+        const sfeDaysDiff = Math.ceil((sfeDeadline - today) / (1000 * 60 * 60 * 24));
+        const sfeDaysText = formatDaysLeft(sfeDaysDiff);
 
-  const sfeStatusIcon = sfeStillInTime ? '✅' : '❌';
-  const lsbuStatusIcon = lsbuStillInTime ? '✅' : '❌';
-  
-  const sfeDateColorClass = sfeStillInTime ? 'text-green-400' : 'text-red-400';
-  const lsbuDateColorClass = lsbuStillInTime ? 'text-green-400' : 'text-red-400';
-  
-  const deadlinesDetailsHtml = `
-    <div class="space-y-4">
-        <div>
-            <p class="font-semibold text-gray-300">
-              <span class="inline-block w-6">${sfeStatusIcon}</span>SFE Year of Funding Deadline:
-              <span class="font-bold ${sfeDateColorClass}">${formatDate(sfeDeadline)}</span>
-              <span class="ml-2 text-sm text-gray-500">${sfeDaysText}</span>
-              <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">SFE rule (external)</span>
-            </p>
-            <p class="text-sm text-gray-400 mt-1 pl-10">
-              Withdraw or interrupt before the official course start date to avoid using a year of SFE funding.
-            </p>
-        </div>
-        <div class="border-t border-gray-700"></div>
-        <div>
-            <p class="font-semibold text-gray-300">
-              <span class="inline-block w-6">${lsbuStatusIcon}</span>LSBU Fee Liability Deadline:
-              <span class="font-bold ${lsbuDateColorClass}">${formatDate(lsbuFeeLiabilityDeadline)}</span>
-              <span class="ml-2 text-sm text-gray-500">${lsbuDaysText}</span>
-              <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">LSBU rule (internal)</span>
-            </p>
-            <p class="text-sm text-gray-400 mt-1 pl-10">
-              Per LSBU Tuition Fee Regulations 2025/26, section 23.5 — last date to withdraw or interrupt without tuition fee liability.
-            </p>
-        </div>
-    </div>
-  `;
+        const fourteenDayAnchor = (enrolDate <= courseStart) ? courseStart : enrolDate;
+        const fourteenDayDeadline = addDays(fourteenDayAnchor, 14);
+        const cohortCap = isHsc ? d("2025-10-06") : d("2025-10-20");
+        const lsbuFeeLiabilityDeadline = (fourteenDayDeadline > cohortCap) ? fourteenDayDeadline : cohortCap;
+        const lsbuStillInTime = today <= lsbuFeeLiabilityDeadline;
+        const lsbuDaysDiff = Math.ceil((lsbuFeeLiabilityDeadline - today) / (1000 * 60 * 60 * 24));
+        const lsbuDaysText = formatDaysLeft(lsbuDaysDiff);
+        
+        const sfeStatusIcon = sfeStillInTime ? '✅' : '❌';
+        const lsbuStatusIcon = lsbuStillInTime ? '✅' : '❌';
+        
+        const sfeDateColorClass = sfeStillInTime ? 'text-green-400' : 'text-red-400';
+        const lsbuDateColorClass = lsbuStillInTime ? 'text-green-400' : 'text-red-400';
 
-  const collapsibleSectionHtml = `
-    <div>
-        <button onclick="toggleDetails()" class="w-full flex justify-between items-center text-left text-gray-300 font-semibold p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition">
-            <span>View Deadline Breakdown</span>
-            <i id="details-arrow" class="fas fa-chevron-down transition-transform"></i>
-        </button>
-        <div id="deadlineDetails" class="hidden p-4 mt-2 bg-gray-900/50 rounded-lg">
-            ${deadlinesDetailsHtml}
-        </div>
-    </div>
-  `;
+        // HTML Output
+        const deadlinesDetailsHtml = `
+            <div class="space-y-4">
+                <div>
+                    <p class="font-semibold text-gray-300">
+                        <span class="inline-block w-6">${sfeStatusIcon}</span>SFE Year of Funding Deadline:
+                        <span class="font-bold ${sfeDateColorClass}">${formatDate(sfeDeadline)}</span>
+                        <span class="ml-2 text-sm text-gray-500">${sfeDaysText}</span>
+                        <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">SFE rule (external)</span>
+                    </p>
+                    <p class="text-sm text-gray-400 mt-1 pl-10">
+                        Withdraw or interrupt before the official course start date to avoid using a year of SFE funding.
+                    </p>
+                </div>
+                <div class="border-t border-gray-700"></div>
+                <div>
+                    <p class="font-semibold text-gray-300">
+                        <span class="inline-block w-6">${lsbuStatusIcon}</span>LSBU Fee Liability Deadline:
+                        <span class="font-bold ${lsbuDateColorClass}">${formatDate(lsbuFeeLiabilityDeadline)}</span>
+                        <span class="ml-2 text-sm text-gray-500">${lsbuDaysText}</span>
+                        <span class="ml-2 py-1 px-2 bg-gray-700 text-xs rounded-md">LSBU rule (internal)</span>
+                    </p>
+                    <p class="text-sm text-gray-400 mt-1 pl-10">
+                        Per LSBU Tuition Fee Regulations 2025/26, section 23.5 — last date to withdraw or interrupt without tuition fee liability.
+                    </p>
+                </div>
+            </div>`;
 
-  let sfeStatusHtml = '';
-  if (sfeStillInTime) {
-    sfeStatusHtml = `
-      <div class="bg-green-900/50 border border-green-700 text-green-300 rounded-lg p-4 flex items-center gap-4">
-        <i class="fas fa-check-circle fa-2x"></i>
-        <div>
-          <p class="font-semibold">SFE Funding Deadline: Within deadline</p>
-          <p class="text-sm font-normal text-green-400/80">Withdraw or interrupt before <span class="font-bold">${formatDate(courseStart)}</span> to avoid using a year of SFE funding.</p>
-        </div>
-      </div>`;
-  } else {
-    sfeStatusHtml = `
-      <div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-4">
-        <i class="fas fa-times-circle fa-2x"></i>
-        <div>
-          <p class="font-semibold">SFE Funding Deadline: Deadline passed</p>
-          <p class="text-sm font-normal text-red-400/80">You have passed the deadline; a year of SFE funding will be used.</p>
-        </div>
-      </div>`;
-  }
+        const collapsibleSectionHtml = `
+            <div>
+                <button onclick="toggleDetails()" class="w-full flex justify-between items-center text-left text-gray-300 font-semibold p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition">
+                    <span>View Deadline Breakdown</span>
+                    <i id="details-arrow" class="fas fa-chevron-down transition-transform"></i>
+                </button>
+                <div id="deadlineDetails" class="hidden p-4 mt-2 bg-gray-900/50 rounded-lg">
+                    ${deadlinesDetailsHtml}
+                </div>
+            </div>`;
 
-  let lsbuStatusHtml = '';
-  if (lsbuStillInTime) {
-    lsbuStatusHtml = `
-      <div class="bg-green-900/50 border border-green-700 text-green-300 rounded-lg p-4 flex items-center gap-4">
-        <i class="fas fa-check-circle fa-2x"></i>
-        <div>
-          <p class="font-semibold">LSBU Fee Liability Deadline: Within deadline</p>
-          <p class="text-sm font-normal text-green-400/80">Withdraw or interrupt by <span class="font-bold">${formatDate(lsbuFeeLiabilityDeadline)}</span> to avoid tuition fee charges.</p>
-        </div>
-      </div>`;
-  } else {
-    lsbuStatusHtml = `
-      <div class="bg-red-900/50 border border-red-700 text-red-300 rounded-lg p-4 flex items-center gap-4">
-        <i class="fas fa-times-circle fa-2x"></i>
-        <div>
-          <p class="font-semibold">LSBU Fee Liability Deadline: Deadline passed</p>
-          <p class="text-sm font-normal text-red-400/80">You have passed the deadline and may be liable for tuition fees.</p>
-        </div>
-      </div>`;
-  }
 
-  const trafficLightHtml = `
-    <div class="mt-6 space-y-4">
-      ${sfeStatusHtml}
-      ${lsbuStatusHtml}
-    </div>
-  `;
+        let sfeStatusHtml = '';
+        if (sfeStillInTime) {
+            sfeStatusHtml = `
+                <div class="bg-sky-900/60 border border-sky-700 text-sky-200 rounded-lg p-4 space-y-2">
+                    <div class="flex items-center gap-3">
+                       <i class="fas fa-check-circle text-xl"></i>
+                       <h3 class="font-semibold">SFE Funding Deadline: Within deadline <span class="font-normal text-sky-400/80">${sfeDaysText}</span></h3>
+                    </div>
+                    <p class="text-sm text-sky-300/80">Withdraw or interrupt before <strong>${formatDate(courseStart)}</strong> to avoid using a year of SFE funding.</p>
+                </div>`;
+        } else {
+            sfeStatusHtml = `
+                <div class="bg-red-900/60 border border-red-700 text-red-200 rounded-lg p-4 space-y-2">
+                    <div class="flex items-center gap-3">
+                       <i class="fas fa-times-circle text-xl"></i>
+                       <h3 class="font-semibold">SFE Funding Deadline: Deadline passed <span class="font-normal text-red-400/80">${sfeDaysText}</span></h3>
+                    </div>
+                    <p class="text-sm text-red-300/80">A year of SFE funding will be used.</p>
+                </div>`;
+        }
 
-  out.innerHTML = collapsibleSectionHtml + '<div class="border-t border-gray-700 my-6"></div>' + trafficLightHtml;
-}
+        let lsbuStatusHtml = '';
+        if (lsbuStillInTime) {
+            lsbuStatusHtml = `
+                <div class="bg-emerald-900/60 border border-emerald-700 text-emerald-200 rounded-lg p-4 space-y-2">
+                    <div class="flex items-center gap-3">
+                       <i class="fas fa-check-circle text-xl"></i>
+                       <h3 class="font-semibold">LSBU Fee Liability Deadline: Within deadline <span class="font-normal text-emerald-400/80">${lsbuDaysText}</span></h3>
+                    </div>
+                    <p class="text-sm text-emerald-300/80">Withdraw or interrupt by <strong>${formatDate(lsbuFeeLiabilityDeadline)}</strong> to avoid tuition fee charges.</p>
+                </div>`;
+        } else {
+            lsbuStatusHtml = `
+                <div class="bg-red-900/60 border border-red-700 text-red-200 rounded-lg p-4 space-y-2">
+                     <div class="flex items-center gap-3">
+                       <i class="fas fa-times-circle text-xl"></i>
+                       <h3 class="font-semibold">LSBU Fee Liability Deadline: Deadline passed <span class="font-normal text-red-400/80">${lsbuDaysText}</span></h3>
+                    </div>
+                    <p class="text-sm text-red-300/80">The deadline has passed and the student may be liable for tuition fees.</p>
+                </div>`;
+        }
+        
+        let hscWarningHtml = '';
+        if (isHsc) {
+            hscWarningHtml = `
+                <div class="mt-4 bg-amber-900/60 border border-amber-700 text-amber-200 rounded-lg p-4 text-sm">
+                    <p class="font-semibold">HSC Funding Advisory:</p>
+                    <p class="text-amber-300/80 mb-2">Late full enrolment after the official course start date will result in a year of SFE funding being used. 
+                        <span class="text-blue-400 cursor-pointer inline-flex items-center gap-2" onclick="toggleHscNote()">
+                            Expand for full details
+                            <i id="hscArrow" class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </span>
+                    </p>
+                    <div id="hscNote" class="hidden mt-3 pt-3 border-t border-amber-700/50">
+                        <p class="mb-2"><strong>Adviser Note – HSC Students: SFE Funding Year Usage</strong></p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Late full enrolment:</strong> If a student fully enrols <em>after</em> their official course start date, SFE will record a year of funding as used. This applies regardless of the reason for late enrolment (e.g. delayed exam results) and regardless of whether any payments have yet been made.</li>
+                            <li><strong>Not fully enrolled / partial enrolment:</strong>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li>If the student has not yet fully enrolled, or is only partially enrolled, their SFE funding year will <em>not</em> be used if they interrupt or withdraw before full enrolment.</li>
+                                    <li>If the student fully enrolled before the official course start date, their SFE funding year will <em>not</em> be used if the official interruption/withdrawal date is before the course start date.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>`;
+        }
+
+        const trafficLightHtml = `
+            <div class="space-y-4">
+                ${sfeStatusHtml}
+                ${lsbuStatusHtml}
+                ${hscWarningHtml}
+            </div>
+        `;
+
+        out.innerHTML = `
+            <div class="border-t border-gray-700"></div>
+            <h2 class="text-xl font-semibold text-white text-center mb-6 mt-6">Your Deadlines</h2>
+            ${collapsibleSectionHtml}
+            <div class="border-t border-gray-700 my-6"></div>
+            ${trafficLightHtml}
+        `;
+    }
 </script>
 
 </body>
 </html>
-
-
